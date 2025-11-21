@@ -1,70 +1,66 @@
-# Getting Started with Create React App
+# 🛍️ BellaVendas - Sistema de Gestão Comercial
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![Status do Projeto](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow)
+![Versão](https://img.shields.io/badge/Versão-1.0.0-blue)
+![Licença](https://img.shields.io/badge/Licença-MIT-green)
 
-## Available Scripts
+> **BellaVendas** é uma solução completa e moderna para gestão de micro e pequenas empresas. Desenvolvido para simplificar o controle de estoque, vendas, financeiro e relacionamento com clientes em uma interface intuitiva e responsiva.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📸 Screenshots
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+<div align="center">
+  <img src="https://via.placeholder.com/800x400?text=Dashboard+BellaVendas" alt="Dashboard BellaVendas" width="800"/>
+</div>
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## ✨ Funcionalidades Principais
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 📊 Dashboard Inteligente
+* **KPIs em Tempo Real:** Acompanhamento de Vendas Hoje, Clientes Ativos, Total do Mês e Alertas de Estoque.
+* **Gráficos e Resumos:** Visualização rápida de produtos mais vendidos e desempenho financeiro.
+* **Ticket Médio:** Análise de ticket médio diário e mensal.
 
-### `npm run build`
+### 📦 Gestão de Produtos e Estoque
+* **Cadastro Completo:** Upload de imagens (integração Cloudinary), categorização e fornecedores.
+* **Precificação Inteligente:** Cálculo automático de margem de lucro (%) com indicadores visuais de saúde financeira.
+* **Controle de Estoque:** Alertas visuais para estoque baixo e status (Ativo, Esgotado, Inativo).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 💰 Vendas e PDV
+* **Registro Ágil:** Fluxo de venda simplificado com seleção de clientes e produtos.
+* **Status Financeiro:** Controle de pagamentos (Pendente, Pago, Atrasado, Cancelado).
+* **Histórico:** Listagem completa com filtros avançados por data, status e forma de pagamento.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 💸 Financeiro (Contas a Pagar)
+* **Controle de Despesas:** Gestão de contas operacionais, fornecedores e custos fixos.
+* **Status de Pagamento:** Marcação de contas pagas e visualização de atrasos.
+* **Filtros:** Organização por centro de custo, categoria e periodicidade.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 👥 CRM (Clientes e Fornecedores)
+* **Gestão de Entidades:** CRUD completo de Clientes e Fornecedores.
+* **Histórico:** Visualização rápida de compras por cliente.
 
-### `npm run eject`
+### 📈 Relatórios e Exportação
+* **Formatos Compatíveis:** Exportação de dados em **CSV** (Excel/Sheets).
+* **Tipos de Relatório:** Vendas, Inventário de Estoque, Financeiro e Base de Clientes.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### ⚙️ Configurações e Segurança
+* **Autenticação:** Login seguro via Firebase Auth.
+* **Personalização:** Modos de tema (Dark Mode), dados da empresa e gestão de usuários.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🛠️ Tecnologias Utilizadas
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+O projeto foi construído utilizando as melhores práticas de desenvolvimento web moderno:
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+| Categoria | Tecnologias |
+| :--- | :--- |
+| **Frontend** | React.js, React Router DOM |
+| **Estilização** | Tailwind CSS, FontAwesome |
+| **Backend / BaaS** | Firebase (Firestore, Auth, Functions) |
+| **Uploads** | Cloudinary (Imagens de produtos) |
+| **Data/Hora** | date-fns, React Datepicker |
+| **UI/UX** | Framer Motion (Animações), React Hot Toast (Notificações) |
