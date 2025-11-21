@@ -1,0 +1,137 @@
+/* Define variáveis de cor para facilitar a customização */
+:root {
+  --datepicker-bg: #ffffff;
+  --datepicker-text-color: #333;
+  --datepicker-primary-color: #9c7dcb;      /* Sua cor primária */
+  --datepicker-primary-light-color: #c4b0e6; /* Sua cor primária clara */
+  --datepicker-in-range-bg: #f3effb;        /* Fundo do período selecionado */
+  --datepicker-border-color: #e2e8f0;
+}
+
+/* Container principal do popper do calendário */
+.custom-datepicker-popper {
+  z-index: 1001 !important;
+}
+
+.custom-datepicker-popper .react-datepicker {
+  font-family: 'Inter', sans-serif;
+  border: 1px solid var(--datepicker-border-color);
+  background-color: var(--datepicker-bg);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 8px;
+}
+
+.custom-datepicker-popper .react-datepicker__triangle {
+  display: none;
+}
+
+/* Cabeçalho geral */
+.custom-datepicker-popper .react-datepicker__header {
+  background-color: var(--datepicker-bg);
+  border-bottom: 1px solid var(--datepicker-border-color);
+  padding-top: 12px;
+}
+
+.custom-datepicker-popper .react-datepicker__current-month {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--datepicker-text-color);
+  padding-bottom: 8px;
+}
+
+/* Botões de navegação < > */
+.custom-datepicker-popper .react-datepicker__navigation {
+  top: 18px;
+}
+.custom-datepicker-popper .react-datepicker__navigation-icon::before {
+  border-color: #555;
+  border-width: 2px 2px 0 0;
+}
+
+/* Dias da semana (Sun, Mon, Tue...) */
+.custom-datepicker-popper .react-datepicker__day-name {
+  color: #64748b;
+  font-weight: 600;
+  width: 2.2rem;
+  line-height: 2.2rem;
+  margin: 0.15rem;
+}
+
+/* Célula de cada dia */
+.custom-datepicker-popper .react-datepicker__day {
+  color: var(--datepicker-text-color);
+  width: 2.2rem;
+  line-height: 2.2rem;
+  margin: 0.15rem;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.custom-datepicker-popper .react-datepicker__day:hover {
+  background-color: var(--datepicker-primary-light-color);
+  border-radius: 50%;
+}
+
+/* Dias que não pertencem ao mês atual */
+.custom-datepicker-popper .react-datepicker__day--outside-month {
+  color: #94a3b8;
+}
+
+/* Dia selecionado (início ou fim do período) */
+.custom-datepicker-popper .react-datepicker__day--selected,
+.custom-datepicker-popper .react-datepicker__day--range-start,
+.custom-datepicker-popper .react-datepicker__day--range-end {
+  background-color: var(--datepicker-primary-color);
+  color: #fff;
+  font-weight: bold;
+}
+.custom-datepicker-popper .react-datepicker__day--selected:hover,
+.custom-datepicker-popper .react-datepicker__day--range-start:hover,
+.custom-datepicker-popper .react-datepicker__day--range-end:hover {
+  background-color: var(--datepicker-primary-color);
+}
+
+/* Dias que estão dentro do período selecionado */
+.custom-datepicker-popper .react-datepicker__day--in-range {
+  background-color: var(--datepicker-in-range-bg);
+  color: #555;
+  border-radius: 0;
+}
+.custom-datepicker-popper .react-datepicker__day--in-range:not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end) {
+    border-radius: 0;
+}
+
+/* Arredonda os cantos do início e fim do período quando estão dentro de uma semana */
+.custom-datepicker-popper .react-datepicker__day--range-start {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.custom-datepicker-popper .react-datepicker__day--range-end {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+
+/* --- ESTILOS PARA O SELETOR DE MÊS (JÁ EXISTENTES) --- */
+.custom-datepicker-popper .react-datepicker__month-text {
+  display: inline-block;
+  line-height: 40px;
+  width: 70px;
+  margin: 6px;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.custom-datepicker-popper .react-datepicker__month-text:hover {
+  background-color: var(--datepicker-primary-light-color);
+}
+.custom-datepicker-popper .react-datepicker__month-text--selected {
+  background-color: var(--datepicker-primary-color);
+  color: #fff;
+  font-weight: 700;
+}
+.custom-datepicker-popper .react-datepicker__month-text--keyboard-selected {
+    background-color: var(--datepicker-primary-light-color);
+}

@@ -1,13 +1,402 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap');
+
+/* 1. Injeta os estilos base do Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2. Nova paleta de cores moderna */
+:root {
+  --primary: #7e5bef;
+  --primary-light: #a78bfa;
+  --primary-dark: #6d28d9;
+  --secondary: #ec4899;
+  --accent: #f0abfc;
+  --text: #4b5563;
+  --text-dark: #1f2937;
+  --background: #f9fafb;
+  --card: #ffffff;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+}
+
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  background-attachment: fixed;
+  font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* 3. Tipografia refinada */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  color: var(--text-dark);
+  letter-spacing: -0.025em;
+}
+
+h1 {
+  @apply text-3xl md:text-4xl lg:text-5xl;
+}
+
+h2 {
+  @apply text-2xl md:text-3xl lg:text-4xl;
+}
+
+h3 {
+  @apply text-xl md:text-2xl lg:text-3xl;
+}
+
+/* 4. Botões modernizados */
+.btn-primary {
+  @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 shadow-md;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-primary:hover {
+  @apply shadow-lg;
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+.btn-primary:hover::before {
+  opacity: 1;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 shadow-md;
+  background: linear-gradient(135deg, var(--secondary) 0%, #db2777 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-secondary:hover {
+  @apply shadow-lg;
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+.btn-secondary:hover::before {
+  opacity: 1;
+}
+
+.btn-outline {
+  @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 border-2;
+  border-color: var(--primary);
+  color: var(--primary);
+  background: transparent;
+}
+
+.btn-outline:hover {
+  background-color: rgba(126, 91, 239, 0.08);
+  transform: translateY(-2px);
+}
+
+/* 5. Cards e elementos de UI modernos */
+.card {
+  @apply rounded-2xl p-6 transition-all duration-300 shadow-md;
+  background-color: var(--card);
+  border: 1px solid rgba(199, 210, 254, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.card:hover {
+  @apply shadow-xl;
+  transform: translateY(-5px);
+  border-color: rgba(199, 210, 254, 0.8);
+}
+
+.sidebar-item {
+  @apply px-4 py-3 rounded-lg transition-colors duration-300 cursor-pointer flex items-center gap-3;
+  color: var(--text);
+}
+
+.sidebar-item:hover {
+  background-color: rgba(199, 210, 254, 0.3);
+}
+
+.sidebar-item.active {
+  background: linear-gradient(90deg, rgba(199, 210, 254, 0.4) 0%, rgba(199, 210, 254, 0.2) 100%);
+  @apply font-semibold;
+  color: var(--primary-dark);
+  border-left: 4px solid var(--primary);
+}
+
+.status-badge {
+  @apply px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center;
+}
+
+.status-badge.ativo {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #065f46;
+}
+
+.status-badge.ativo::before {
+  content: '';
+  @apply w-2 h-2 rounded-full mr-2;
+  background-color: #10b981;
+}
+
+.status-badge.inativo {
+  background-color: rgba(249, 168, 212, 0.15);
+  color: #be185d;
+}
+
+.status-badge.inativo::before {
+  content: '';
+  @apply w-2 h-2 rounded-full mr-2;
+  background-color: #ec4899;
+}
+
+.product-card {
+  @apply transition-all duration-300 overflow-hidden rounded-2xl;
+  border: 1px solid rgba(199, 210, 254, 0.4);
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(125, 92, 239, 0.1), 0 10px 10px -5px rgba(125, 92, 239, 0.04);
+  border-color: var(--primary-light);
+}
+
+/* 6. Elementos decorativos modernos */
+.decorative-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  z-index: -1;
+}
+
+.decorative-wave svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 120px;
+}
+
+.decorative-wave .shape-fill {
+  fill: rgba(199, 210, 254, 0.25);
+}
+
+.floral-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%237e5bef' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+  opacity: 0.08;
+}
+
+/* 7. Animações suaves melhoradas */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+.float-element {
+  animation: float 8s ease-in-out infinite;
+}
+
+.fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 8. Formulários estilizados modernos */
+input, select, textarea {
+  @apply p-3.5 rounded-xl border border-gray-200 focus:outline-none transition-all duration-300;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: var(--text);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 4px rgba(125, 92, 239, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.input-group {
+  @apply relative;
+}
+
+.input-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400;
+}
+
+.input-with-icon {
+  @apply pl-10;
+}
+
+/* 9. Efeito de transição para modais */
+.ReactModal__Overlay {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 300ms ease-out;
+}
+
+.ReactModal__Overlay--after-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ReactModal__Overlay--before-close {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.ReactModal__Content {
+  @apply rounded-2xl border-none shadow-xl;
+  background: var(--card);
+  border: 1px solid rgba(199, 210, 254, 0.5) !important;
+}
+
+/* 10. Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(199, 210, 254, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(126, 91, 239, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* 11. Efeito de vidro (glassmorphism) */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 12. Notificações e alertas modernos */
+.notification {
+  @apply p-4 rounded-xl shadow-lg border-l-4 flex items-start;
+  background-color: var(--card);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.notification.success {
+  border-left-color: var(--success);
+}
+
+.notification.error {
+  border-left-color: var(--danger);
+}
+
+.notification.warning {
+  border-left-color: var(--warning);
+}
+
+.notification.info {
+  border-left-color: var(--info);
+}
+
+/* 13. Efeito de gradiente sutil em elementos */
+.gradient-border {
+  position: relative;
+  background: var(--card);
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  z-index: -1;
+}
+
+/* 14. Tabelas estilizadas */
+.table {
+  @apply w-full;
+}
+
+.table th {
+  @apply px-4 py-3 text-left font-semibold text-sm text-gray-700 bg-gray-50;
+}
+
+.table td {
+  @apply px-4 py-3 border-t border-gray-100;
+}
+
+.table tr:hover td {
+  @apply bg-purple-50;
+}
+
+/* 15. Dashboard cards */
+.dashboard-card {
+  @apply rounded-2xl p-5 transition-all duration-300;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border: 1px solid rgba(199, 210, 254, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(125, 92, 239, 0.1), 0 10px 10px -5px rgba(125, 92, 239, 0.04);
 }
