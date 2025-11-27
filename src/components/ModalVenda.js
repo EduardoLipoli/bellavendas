@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getClientes, getProdutos, addVenda, updateVenda } from '../services/firestoreService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faTimes, faMinus, faPlus, faSearch, faMoneyBillWave, faCreditCard, faGift } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faTimes, faPlus, faSearch, faCreditCard, faGift } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 
 // Função auxiliar para lidar com decimais
@@ -12,7 +12,6 @@ const parseCurrency = (value) => {
   return parseFloat(cleanValue) || 0;
 };
 
-// Formata data para YYYY-MM-DD (String)
 const toInputDate = (date) => {
   if (!date) return '';
   const d = new Date(date);
@@ -26,8 +25,6 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
   const [produtos, setProdutos] = useState([]);
   const [clienteSelecionado, setClienteSelecionado] = useState('');
   const [carrinho, setCarrinho] = useState([]);
-  
-  // Estados de Pagamento
   const [pagamentos, setPagamentos] = useState([]); 
   const [pagamentoAtual, setPagamentoAtual] = useState({
       metodo: 'Cartão de Crédito',
@@ -35,14 +32,12 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
       parcelas: 1,
       dataVencimento: toInputDate(new Date(new Date().setDate(new Date().getDate() + 30)))
   });
-
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [termoBuscaProduto, setTermoBuscaProduto] = useState('');
   const [descontoPercentual, setDescontoPercentual] = useState(''); 
   const [mostrarConfirmacaoFechar, setMostrarConfirmacaoFechar] = useState(false);
 
-  // --- LÓGICA DE DADOS ---
   useEffect(() => {
     if (isOpen) {
       const carregarDadosIniciais = async () => {
@@ -55,7 +50,7 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
           setClientes(clientesResponse.data || []);
           setProdutos(produtosData);
         } catch (err) {
-          toast.error("Falha ao carregar dados de suporte.");
+          toast.error("Falha ao carregar dados.");
         } finally {
           setLoading(false);
         }
@@ -65,11 +60,13 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
       if (vendaParaEditar) {
         setClienteSelecionado(vendaParaEditar.cliente.id);
         
-        // Mapear carrinho existente garantindo propriedades de brinde
+        // CORREÇÃO 1: Garantir que custo e imagem não sejam undefined ao carregar
         const itensFormatados = (vendaParaEditar.itens || []).map(item => ({
             ...item,
-            isBrinde: item.precoUnitario === 0,
-            precoOriginal: item.precoOriginal || item.precoUnitario
+            isBrinde: item.isBrinde === true || item.precoUnitario === 0,
+            precoOriginal: item.precoOriginal !== undefined ? item.precoOriginal : item.precoUnitario,
+            custo: item.custo || 0, // Evita undefined
+            imageUrl: item.imageUrl || null // Evita undefined
         }));
         setCarrinho(itensFormatados);
         
@@ -115,115 +112,55 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
     }
   };
 
-  const confirmarFechar = () => {
-    resetState();
-    onClose();
-    setMostrarConfirmacaoFechar(false);
-  };
+  const confirmarFechar = () => { resetState(); onClose(); setMostrarConfirmacaoFechar(false); };
+  const cancelarFechar = () => { setMostrarConfirmacaoFechar(false); };
 
-  const cancelarFechar = () => {
-    setMostrarConfirmacaoFechar(false);
-  };
-
-  // --- CÁLCULOS ---
-  const calcularSubtotal = useCallback(() => {
-    return carrinho.reduce((acc, item) => acc + (item.precoUnitario * item.quantidade), 0);
-  }, [carrinho]);
-
-  const calcularInvestimentoBrindes = useCallback(() => {
-    return carrinho.reduce((acc, item) => {
-        if (item.isBrinde || item.precoUnitario === 0) {
-            return acc + (item.custo * item.quantidade);
-        }
-        return acc;
-    }, 0);
-  }, [carrinho]);
-
+  const calcularSubtotal = useCallback(() => carrinho.reduce((acc, item) => acc + (item.precoUnitario * item.quantidade), 0), [carrinho]);
+  const calcularInvestimentoBrindes = useCallback(() => carrinho.reduce((acc, item) => (item.isBrinde || item.precoUnitario === 0) ? acc + (item.custo * item.quantidade) : acc, 0), [carrinho]);
   const calcularValorDoDesconto = useCallback(() => {
     const subtotal = calcularSubtotal();
     const desc = parseFloat(String(descontoPercentual).replace(',', '.')) || 0;
-    if (desc > 0) {
-      return subtotal * (desc / 100);
-    }
-    return 0;
+    return desc > 0 ? subtotal * (desc / 100) : 0;
   }, [calcularSubtotal, descontoPercentual]);
+  const calcularTotal = useCallback(() => Math.max(0, calcularSubtotal() - calcularValorDoDesconto()), [calcularSubtotal, calcularValorDoDesconto]);
+  const calcularTotalPago = useCallback(() => pagamentos.reduce((acc, p) => acc + parseFloat(p.valor), 0), [pagamentos]);
+  const calcularRestante = useCallback(() => Math.max(0, calcularTotal() - calcularTotalPago()), [calcularTotal, calcularTotalPago]);
 
-  const calcularTotal = useCallback(() => {
-    return Math.max(0, calcularSubtotal() - calcularValorDoDesconto());
-  }, [calcularSubtotal, calcularValorDoDesconto]);
-
-  const calcularTotalPago = useCallback(() => {
-      return pagamentos.reduce((acc, p) => acc + parseFloat(p.valor), 0);
-  }, [pagamentos]);
-
-  const calcularRestante = useCallback(() => {
-      const total = calcularTotal();
-      const pago = calcularTotalPago();
-      return Math.max(0, total - pago);
-  }, [calcularTotal, calcularTotalPago]);
-
-  // Atualiza input de pagamento quando total muda
   useEffect(() => {
       const restante = calcularRestante();
       if (restante > 0 && !vendaParaEditar) {
-          setPagamentoAtual(prev => ({
-              ...prev,
-              valor: restante.toFixed(2).replace('.', ',')
-          }));
+          setPagamentoAtual(prev => ({ ...prev, valor: restante.toFixed(2).replace('.', ',') }));
       }
   }, [carrinho, descontoPercentual, pagamentos, calcularRestante, vendaParaEditar]);
 
   const handleAdicionarPagamento = () => {
       const valorNumerico = parseCurrency(pagamentoAtual.valor);
       const restante = calcularRestante();
-
-      if (valorNumerico <= 0) {
-          toast.error("Valor deve ser maior que zero.");
-          return;
-      }
-
-      if (valorNumerico > (restante + 0.05)) {
-          toast.error(`Valor excede o restante (R$ ${restante.toFixed(2)})`);
-          return;
-      }
+      if (valorNumerico <= 0) { toast.error("Valor deve ser maior que zero."); return; }
+      if (valorNumerico > (restante + 0.05)) { toast.error(`Valor excede o restante (R$ ${restante.toFixed(2)})`); return; }
 
       const novoPagamento = {
           id: Date.now(),
           metodo: pagamentoAtual.metodo,
           valor: valorNumerico,
           parcelas: pagamentoAtual.metodo === 'Cartão de Crédito' ? parseInt(pagamentoAtual.parcelas) : 1,
+          // Evitar undefined aqui também
           dataVencimento: ['Boleto', 'Crediário'].includes(pagamentoAtual.metodo) ? pagamentoAtual.dataVencimento : null,
           status: ['Dinheiro', 'Cartão de Débito', 'Pix', 'Cartão de Crédito'].includes(pagamentoAtual.metodo) ? 'Pago' : 'Pendente'
       };
-
       setPagamentos([...pagamentos, novoPagamento]);
       setPagamentoAtual(prev => ({ ...prev, valor: '', parcelas: 1 }));
   };
 
-  const handleRemoverPagamento = (id) => {
-      setPagamentos(pagamentos.filter(p => p.id !== id));
-  };
+  const handleRemoverPagamento = (id) => setPagamentos(pagamentos.filter(p => p.id !== id));
 
-  // --- CARRINHO & BRINDES ---
   const handleAddProdutoAoCarrinho = (produto) => {
     const produtoExistente = carrinho.find(item => item.id === produto.id);
-
     if (produtoExistente) {
-        if (produtoExistente.quantidade >= produto.estoque) {
-            toast.error(`Estoque máximo de "${produto.nome}" atingido.`);
-            return;
-        }
-        setCarrinho(carrinho.map(item => 
-            item.id === produto.id 
-                ? { ...item, quantidade: item.quantidade + 1 } 
-                : item
-        ));
+        if (produtoExistente.quantidade >= produto.estoque) { toast.error(`Estoque máximo atingido.`); return; }
+        setCarrinho(carrinho.map(item => item.id === produto.id ? { ...item, quantidade: item.quantidade + 1 } : item));
     } else {
-        if (produto.estoque <= 0) {
-            toast.error("Produto fora de estoque.");
-            return;
-        }
-        
+        if (produto.estoque <= 0) { toast.error("Produto fora de estoque."); return; }
         setCarrinho([...carrinho, {
             id: produto.id,
             nome: produto.nome,
@@ -231,7 +168,7 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
             precoUnitario: produto.preco,
             precoOriginal: produto.preco, 
             custo: produto.custo || 0,
-            imageUrl: produto.imageUrl || '',
+            imageUrl: produto.imageUrl || null, // Importante: null em vez de undefined
             estoque: produto.estoque,
             isBrinde: false
         }]);
@@ -242,11 +179,7 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
     setCarrinho(carrinho.map(item => {
         if (item.id === produtoId) {
             const novoStatusBrinde = !item.isBrinde;
-            return {
-                ...item,
-                isBrinde: novoStatusBrinde,
-                precoUnitario: novoStatusBrinde ? 0 : item.precoOriginal
-            };
+            return { ...item, isBrinde: novoStatusBrinde, precoUnitario: novoStatusBrinde ? 0 : item.precoOriginal };
         }
         return item;
     }));
@@ -255,68 +188,44 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
   const handleAlterarQuantidade = (produtoId, delta) => {
     const item = carrinho.find(item => item.id === produtoId);
     if (!item) return;
-
     const produto = produtos.find(p => p.id === produtoId);
     const novaQuantidade = item.quantidade + delta;
-
-    if (delta > 0 && novaQuantidade > (produto?.estoque || 0)) {
-        toast.error(`Estoque máximo atingido!`);
-        return;
-    }
-
-    if (novaQuantidade < 1) {
-        handleRemoverDoCarrinho(produtoId);
-    } else {
-        setCarrinho(carrinho.map(item => 
-            item.id === produtoId
-                ? { ...item, quantidade: novaQuantidade }
-                : item
-        ));
-    }
+    if (delta > 0 && novaQuantidade > (produto?.estoque || 0)) { toast.error(`Estoque máximo atingido!`); return; }
+    if (novaQuantidade < 1) handleRemoverDoCarrinho(produtoId);
+    else setCarrinho(carrinho.map(item => item.id === produtoId ? { ...item, quantidade: novaQuantidade } : item));
   };
 
-  const handleRemoverDoCarrinho = (produtoId) => {
-    setCarrinho(carrinho.filter(item => item.id !== produtoId));
-  };
+  const handleRemoverDoCarrinho = (produtoId) => setCarrinho(carrinho.filter(item => item.id !== produtoId));
 
-  // --- FINALIZAR ---
   const handleFinalizarVenda = async () => {
-    if (!clienteSelecionado || carrinho.length === 0) {
-      toast.error("Preencha os dados da venda.");
-      return;
-    }
-
+    if (!clienteSelecionado || carrinho.length === 0) { toast.error("Preencha os dados da venda."); return; }
     const total = calcularTotal();
     const totalPago = calcularTotalPago();
-    
-    if (Math.abs(total - totalPago) > 0.05) {
-        toast.error(`Valor pago (R$ ${totalPago.toFixed(2)}) difere do total (R$ ${total.toFixed(2)})`);
-        return;
-    }
+    if (Math.abs(total - totalPago) > 0.05) { toast.error(`Valor pago difere do total.`); return; }
 
     setIsSubmitting(true);
     const clienteObj = clientes.find(c => c.id === clienteSelecionado);
+    
+    // Verificação de Segurança
+    if (!clienteObj) {
+        toast.error("Erro ao identificar cliente.");
+        setIsSubmitting(false);
+        return;
+    }
+
     const isTotalmentePago = pagamentos.every(p => p.status === 'Pago');
     const statusGeral = isTotalmentePago ? 'Pago' : 'Pendente';
     
+    // Resumo legível
     const formaPagamentoResumo = pagamentos.length === 1 
         ? pagamentos[0].metodo 
         : `Múltiplos (${pagamentos.map(p => p.metodo).join(', ')})`;
 
-    // CORREÇÃO DATA: Garante que seja STRING (YYYY-MM-DD)
-    let dataVencimentoFinal;
-    if (!isTotalmentePago) {
-        const parcelaPendente = pagamentos.find(p => p.status === 'Pendente');
-        // Se houver parcela pendente, usa a data dela. Se não, hoje.
-        dataVencimentoFinal = parcelaPendente ? parcelaPendente.dataVencimento : toInputDate(new Date());
-    } else {
-        // Se for pago, usa hoje
-        dataVencimentoFinal = toInputDate(new Date());
-    }
+    let dataVencimentoFinal = isTotalmentePago 
+        ? toInputDate(new Date()) 
+        : (pagamentos.find(p => p.status === 'Pendente')?.dataVencimento || toInputDate(new Date()));
 
-    // Proteção extra: Se por algum motivo for nulo, define hoje
-    if (!dataVencimentoFinal) dataVencimentoFinal = toInputDate(new Date());
-
+    // CORREÇÃO 2: Preparar objeto LIMPO para o Firestore (sem undefined)
     const vendaData = {
       cliente: { 
         id: clienteObj.id, 
@@ -327,21 +236,24 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
             id: item.id,
             nome: item.nome,
             quantidade: item.quantidade,
-            precoUnitario: item.precoUnitario,
-            precoOriginal: item.precoOriginal,
-            isBrinde: item.isBrinde,
-            imageUrl: item.imageUrl,
-            custo: item.custo,
+            precoUnitario: Number(item.precoUnitario), // Garante número
+            precoOriginal: Number(item.precoOriginal), // Garante número
+            isBrinde: item.isBrinde === true, // Garante boleano
+            imageUrl: item.imageUrl || null, // CRÍTICO: Firestore não aceita undefined
+            custo: item.custo || 0,          // CRÍTICO: Firestore não aceita undefined
       })),
       subtotal: calcularSubtotal(),
       custoBrindes: calcularInvestimentoBrindes(),
       descontoPercentual: parseFloat(String(descontoPercentual).replace(',', '.')) || 0,
       descontoValor: calcularValorDoDesconto(),
       total: total,
-      pagamentos: pagamentos,
+      pagamentos: pagamentos.map(p => ({
+          ...p,
+          dataVencimento: p.dataVencimento || null // Garante que não vá undefined
+      })),
       formaPagamento: formaPagamentoResumo,
       statusPagamento: statusGeral,
-      dataVencimento: dataVencimentoFinal // Agora é uma String YYYY-MM-DD
+      dataVencimento: dataVencimentoFinal
     };
 
     try {
@@ -356,8 +268,8 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
       resetState();
       onClose();
     } catch (err) {
-      console.error(err); // Log do erro completo no console
-      toast.error("Erro ao salvar venda. Verifique os dados.");
+      console.error("Erro Firestore:", err); 
+      toast.error("Erro ao salvar. Verifique o console.");
     } finally {
       setIsSubmitting(false);
     }
@@ -365,8 +277,7 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
 
   const produtosFiltrados = produtos.filter(produto => {
     const buscaMatch = produto.nome.toLowerCase().includes(termoBuscaProduto.toLowerCase());
-    const estoqueDisponivel = produto.estoque > 0;
-    return buscaMatch && estoqueDisponivel;
+    return buscaMatch && produto.estoque > 0;
   });
 
   if (!isOpen) return null;
@@ -416,14 +327,14 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
                       {produtosFiltrados.map(produto => (
                         <div
                             key={produto.id}
-                            className={`bg-white border p-3 rounded-lg flex items-center gap-3 shadow-sm transition-all ${produto.estoque > 0 ? 'hover:border-blue-500 cursor-pointer' : 'opacity-50'}`}
-                            onClick={() => produto.estoque > 0 && handleAddProdutoAoCarrinho(produto)}
+                            className={`bg-white border p-3 rounded-lg flex items-center gap-3 shadow-sm transition-all hover:border-blue-500 cursor-pointer`}
+                            onClick={() => handleAddProdutoAoCarrinho(produto)}
                         >
                             {produto.imageUrl && <img src={produto.imageUrl} alt="" className="w-12 h-12 object-cover rounded-md border" />}
                             <div className="flex-grow">
-                                <p className="font-bold text-gray-800 text-sm truncate">{produto.nome}</p>
+                                <p className="font-bold text-gray-800 text-sm">{produto.nome}</p>
                                 <div className="flex justify-between items-center mt-1">
-                                    <span className={`text-xs px-2 py-0.5 rounded ${produto.estoque > 0 ? 'bg-gray-100' : 'bg-red-100 text-red-600'}`}>{produto.estoque} un.</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded bg-gray-100`}>{produto.estoque} un.</span>
                                     <span className="text-green-600 font-bold text-sm">R$ {parseFloat(produto.preco).toFixed(2).replace('.',',')}</span>
                                 </div>
                             </div>
@@ -467,15 +378,13 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
                                 <span className={`font-bold text-sm ${item.isBrinde ? 'text-purple-600 line-through decoration-gray-400' : ''}`}>
                                     {item.isBrinde ? 'Grátis' : `R$ ${(item.quantidade * item.precoUnitario).toFixed(2).replace('.',',')}`}
                                 </span>
-                                
                                 <button 
                                     onClick={() => handleToggleBrinde(item.id)}
-                                    title={item.isBrinde ? "Cobrar valor normal" : "Marcar como Brinde (Grátis)"}
+                                    title="Marcar como Brinde"
                                     className={`p-1.5 rounded transition-colors ${item.isBrinde ? 'bg-purple-500 text-white' : 'text-gray-400 hover:text-purple-500 hover:bg-purple-50'}`}
                                 >
                                     <FontAwesomeIcon icon={faGift} />
                                 </button>
-                                
                                 <button onClick={() => handleRemoverDoCarrinho(item.id)} className="text-red-400 hover:text-red-600 p-1.5"><FontAwesomeIcon icon={faTimes} /></button>
                             </div>
                           </div>
@@ -488,14 +397,12 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
                             <span className="text-gray-500">Subtotal</span>
                             <span className="font-medium">R$ {calcularSubtotal().toFixed(2).replace('.',',')}</span>
                         </div>
-                        
                         {calcularInvestimentoBrindes() > 0 && (
                             <div className="flex justify-between text-purple-700 bg-purple-50 p-1 rounded px-2">
                                 <span className="flex items-center gap-1"><FontAwesomeIcon icon={faGift} className="text-xs"/> Investimento em Mimos</span>
                                 <span className="font-bold">R$ {calcularInvestimentoBrindes().toFixed(2).replace('.',',')}</span>
                             </div>
                         )}
-
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-500">Desconto (%)</span>
@@ -512,9 +419,7 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
 
                 {/* PAGAMENTOS */}
                 <div className="bg-white p-5 rounded-xl border">
-                    <h3 className="text-md font-semibold mb-3 flex items-center gap-2"><FontAwesomeIcon icon={faCreditCard} className="text-blue-500"/> Pagamento</h3>
-                    
-                    {/* CORREÇÃO DO GRID AQUI: col-span somando 12 (4+3+3+2) */}
+                    <h3 className="text-lg font-semibold mb-2">Pagamento</h3>
                     <div className="grid grid-cols-12 gap-2 mb-3 items-end">
                         <div className="col-span-4">
                             <label className="text-xs text-gray-500 block mb-1">Método</label>
@@ -526,8 +431,6 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
                             <label className="text-xs text-gray-500 block mb-1">Valor</label>
                             <input type="text" className="w-full p-2 border rounded text-sm font-semibold text-green-700" value={pagamentoAtual.valor} onChange={e => setPagamentoAtual({...pagamentoAtual, valor: e.target.value.replace(/[^0-9,.]/g, '')})} />
                         </div>
-
-                        {/* Coluna Condicional Ajustada para 3 Cols */}
                         {pagamentoAtual.metodo === 'Cartão de Crédito' ? (
                              <div className="col-span-3">
                                 <label className="text-xs text-gray-500 block mb-1">Parcelas</label>
@@ -540,15 +443,11 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
                                 <label className="text-xs text-gray-500 block mb-1">Vencimento</label>
                                 <input type="date" className="w-full p-2 border rounded text-sm" value={pagamentoAtual.dataVencimento} onChange={e => setPagamentoAtual({...pagamentoAtual, dataVencimento: e.target.value})} />
                             </div>
-                        ) : (
-                            <div className="col-span-3"></div>
-                        )}
-
+                        ) : (<div className="col-span-3"></div>)}
                         <div className="col-span-2">
                             <button onClick={handleAdicionarPagamento} disabled={calcularRestante() <= 0.05} className="w-full bg-blue-500 text-white p-2 rounded text-sm font-bold disabled:opacity-50"><FontAwesomeIcon icon={faPlus} /></button>
                         </div>
                     </div>
-
                     <div className="bg-gray-50 rounded border p-2 mb-3 min-h-[60px]">
                         {pagamentos.map((p, idx) => (
                             <div key={idx} className="flex justify-between items-center text-sm border-b last:border-0 border-gray-200 py-1">
@@ -560,7 +459,6 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
                             </div>
                         ))}
                     </div>
-                    
                     <div className="flex justify-between items-center text-sm font-medium">
                         <span className="text-gray-600">Restante:</span>
                         <span className={`text-lg font-bold ${calcularRestante() > 0 ? 'text-red-500' : 'text-green-500'}`}>R$ {calcularRestante().toFixed(2).replace('.',',')}</span>
@@ -578,5 +476,4 @@ const ModalVenda = ({ isOpen, onClose, onVendaFinalizada, vendaParaEditar }) => 
     </div>
   );
 };
-
 export default ModalVenda;

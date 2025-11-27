@@ -421,7 +421,7 @@ const ProductFormModal = ({
       <div className="flex flex-col h-full">
         <div className="bg-gradient-to-r from-primary-dark to-primary text-white p-6 sticky top-0 z-10">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-2xl font-bold text-white">
               {produto ? "Editar Produto" : "Novo Produto"}
             </h2>
             <button
@@ -497,6 +497,20 @@ const ProductFormModal = ({
               )}
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Descrição
+              </label>
+              <textarea
+                name="descricao"
+                value={formData.descricao}
+                onChange={handleChange}
+                rows="3"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                placeholder="Detalhes sobre o produto..."
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
@@ -540,12 +554,8 @@ const ProductFormModal = ({
             <div className="space-y-4 p-5 border border-blue-200 rounded-xl bg-blue-50/50 shadow-sm">
               <div className="flex items-center justify-between border-b border-blue-200 pb-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <FontAwesomeIcon
-                    icon={faCalculator}
-                    className="text-blue-600"
-                  />
                   <h3 className="text-lg font-bold text-gray-800">
-                    Precificação Inteligente
+                    Precificação
                   </h3>
                 </div>
                 <button
