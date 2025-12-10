@@ -438,10 +438,12 @@ const TopCategories = ({ categories, loading }) => (
                   {category.percentual}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              {/* Adicionado overflow-hidden para cortar a barra se passar do limite */}
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                 <div
                   className="bg-gradient-to-r from-pink-400 to-pink-600 h-2 rounded-full"
-                  style={{ width: `${category.percentual}%` }}
+                  // Math.min garante que o CSS nunca receba mais de 100% na largura
+                  style={{ width: `${Math.min(category.percentual, 100)}%` }}
                 ></div>
               </div>
             </div>
